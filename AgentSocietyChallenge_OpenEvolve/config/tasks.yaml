@@ -1,0 +1,51 @@
+analyze_user_task:
+  description: >
+    Analyze the Yelp Active User record for user {user_id}.
+    1. Retrieve their profile using the Interaction Tool (query_type: "user").
+    2. Even if step 1 returns 'No data found', you MUST still retrieve and understand their writing style and rating habits from their reviews (query_type: "review_by_user").
+  expected_output: >
+    A detailed markdown profile of user {user_id}'s preferences and rating habits.
+  agent: user_analyst
+
+analyze_item_task:
+  description: >
+    Analyze the Entity Item record for business {item_id}.
+    1. Retrieve business details using the Interaction Tool (query_type: "item").
+    2. Even if step 1 returns 'No data found', you MUST still retrieve and understand customer sentiment (query_type: "review_by_item").
+  expected_output: >
+    A detailed markdown report of business {item_id}'s features and crowd sentiment.
+  agent: item_analyst
+
+web_research_task:
+  description: >
+    Search the internet for status and context about the business {item_id}.
+    If the business name is UNKNOWN, simply report that external research is unavailable and move on.
+  expected_output: >
+    A brief summary (3-5 sentences) of external findings about the business.
+  agent: web_researcher
+
+classify_persona_task:
+  description: >
+    Review the outputs from the user analyst, item analyst, and web researcher.
+    Classify the user into exactly ONE of these archetypes: HARSH_CRITIC, GENEROUS_RATER, BALANCED_REVIEWER, or ELITE_CONNOISSEUR.
+    Provide the archetype name, confidence level, and top 2 signals.
+  expected_output: >
+    A short paragraph stating the chosen archetype, confidence score, and 2 supporting behavioral signals.
+  agent: persona_classifier
+
+predict_review_task:
+  description: >
+    Predict the star rating and write a simulated review text for user {user_id} for business {item_id}.
+    Using the persona classification provided, calibrate the rating.
+    Do NOT just blindly predict the average star rating of the restaurant. You can safely predict 5.0 stars if the restaurant's average rating is high and the user's past ratings are generally high.
+    Round to one decimal. Keep within 1.0 to 5.0. Write in the user's documented style.
+    
+    ABSOLUTE RULES:
+    - NEVER say data is missing. If unknown, invent a plausible scenario.
+    - Output ONLY a single JSON object. No markdown, no explanation.
+    
+    Your response must be ONLY this JSON:
+    {{"stars": 4.0, "review": "The review text..."}}
+  expected_output: >
+    ONLY a valid JSON object: {{"stars": X.X, "review": "..."}}.
+  agent: prediction_modeler

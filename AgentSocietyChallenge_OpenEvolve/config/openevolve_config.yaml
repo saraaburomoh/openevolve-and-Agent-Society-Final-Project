@@ -1,0 +1,59 @@
+# OpenEvolve Configuration — Final Project Co-Evolution
+max_iterations: 50
+checkpoint_interval: 5
+log_level: "INFO"
+random_seed: 2026
+
+# Evolution strategy
+diff_based_evolution: false
+language: "yaml"
+max_code_length: 8000
+
+# LLM for mutating the agents
+llm:
+  models:
+    - name: "minimaxai/minimax-m2.7"
+      weight: 1.0
+  api_base: "https://integrate.api.nvidia.com/v1"
+  api_key: "${OPENAI_API_KEY}"
+  temperature: 0.8
+  max_tokens: 4096
+  timeout: 120
+  retries: 3
+  retry_delay: 30
+
+# Prompt configuration
+prompt:
+  system_message: |
+    You are an expert multi-agent systems architect. Your goal is to optimize the YAML configuration for a behavioral simulation crew.
+
+    The agents inside the EVOLVE-BLOCK (persona_classifier and prediction_modeler) work together as a pipeline.
+    The persona_classifier categorizes the user, and the prediction_modeler uses that category to predict their star rating and write a review.
+
+    Mutate their configurations (roles, goals, backstories) to improve their coordination and prediction accuracy.
+    Do NOT change the YAML keys (persona_classifier, prediction_modeler).
+    Do NOT use markdown code blocks like ```yaml ... ``` in your output. Just return raw YAML.
+    Do NOT remove the EVOLVE-BLOCK-START or EVOLVE-BLOCK-END markers.
+  num_top_programs: 3
+  num_diverse_programs: 2
+  include_artifacts: false
+
+# Database configuration
+database:
+  population_size: 30
+  archive_size: 15
+  num_islands: 3
+  elite_selection_ratio: 0.3
+  exploitation_ratio: 0.6
+  migration_interval: 10
+  migration_rate: 0.15
+  feature_dimensions:
+    - "complexity"
+    - "diversity"
+
+# Evaluator configuration
+evaluator:
+  timeout: 1800
+  max_retries: 2
+  parallel_evaluations: 2
+  cascade_evaluation: false

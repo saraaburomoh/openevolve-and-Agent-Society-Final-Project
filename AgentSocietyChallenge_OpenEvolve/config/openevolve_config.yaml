@@ -2,12 +2,12 @@
 max_iterations: 50
 checkpoint_interval: 5
 log_level: "INFO"
-random_seed: 2026
+random_seed: 42
 
 # Evolution strategy
 diff_based_evolution: false
-language: "yaml"
-max_code_length: 8000
+language: "text"
+max_code_length: 20000
 
 # LLM for mutating the agents
 llm:
@@ -16,7 +16,7 @@ llm:
       weight: 1.0
   api_base: "https://integrate.api.nvidia.com/v1"
   api_key: "${OPENAI_API_KEY}"
-  temperature: 0.8
+  temperature: 0.7
   max_tokens: 4096
   timeout: 120
   retries: 3
@@ -25,35 +25,49 @@ llm:
 # Prompt configuration
 prompt:
   system_message: |
-    You are an expert multi-agent systems architect. Your goal is to optimize the YAML configuration for a behavioral simulation crew.
+    You are an expert multi-agent systems architect specializing in Dual-Axis Classification and Co-Evolution.
 
-    The agents inside the EVOLVE-BLOCK (persona_classifier and prediction_modeler) work together as a pipeline.
-    The persona_classifier categorizes the user, and the prediction_modeler uses that category to predict their star rating and write a review.
+    The crew uses a Dual-Axis framework. The persona_classifier extracts both a USER ARCHETYPE and an ITEM QUALITY VERDICT
+    using an explicit, hardcoded taxonomy inside the agent's backstory. The prediction_modeler then uses these
+    dual-axis classifications to calibrate star ratings and review text (e.g. using item thresholds when user data is missing).
 
-    Mutate their configurations (roles, goals, backstories) to improve their coordination and prediction accuracy.
+    MUTATION DIRECTIVES:
+    - You are explicitly encouraged to invent entirely new, complex behavioral profiles (e.g., "TREND_FOLLOWER" or "PRICE_SENSITIVE") in the taxonomy.
+    - You may invent new variables to add to the Review DNA extraction.
+    - You are encouraged to alter the exact mathematical formulas for the ITEM QUALITY VERDICT THRESHOLDS to find the optimal statistical split.
+    - You are encouraged to invent new "CASES" for complex edge conditions (e.g., CASE D: What if the business is DECLINING_QUALITY but the user is a GENEROUS_RATER?).
+    - You may design complex heuristic formulas or decision trees to mathematically weigh User DNA vs. Item Sentiment.
+    - Introduce cognitive biases (like Recency Bias or Bandwagon Effect) into the calibration rules if it helps accuracy.
+
+    Your goal: mutate the agent configurations (roles, goals, and specifically the ARCHETYPE TAXONOMY in the backstory)
+    to discover which archetype definitions, labels, or quality thresholds yield the most accurate predictions.
+    You may redefine the types of users or the types of items, or adjust the rating thresholds.
+
+    HARD RULES:
     Do NOT change the YAML keys (persona_classifier, prediction_modeler).
     Do NOT use markdown code blocks like ```yaml ... ``` in your output. Just return raw YAML.
     Do NOT remove the EVOLVE-BLOCK-START or EVOLVE-BLOCK-END markers.
+    Do NOT change the llm: field values.
   num_top_programs: 3
   num_diverse_programs: 2
   include_artifacts: false
 
 # Database configuration
 database:
-  population_size: 30
-  archive_size: 15
+  population_size: 50
+  archive_size: 20
   num_islands: 3
-  elite_selection_ratio: 0.3
-  exploitation_ratio: 0.6
+  elite_selection_ratio: 0.2
+  exploitation_ratio: 0.7
   migration_interval: 10
-  migration_rate: 0.15
+  migration_rate: 0.1
   feature_dimensions:
     - "complexity"
     - "diversity"
 
 # Evaluator configuration
 evaluator:
-  timeout: 1800
+  timeout: 900
   max_retries: 2
-  parallel_evaluations: 2
+  parallel_evaluations: 1
   cascade_evaluation: false
